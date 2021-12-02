@@ -2,12 +2,6 @@ const http = require('http');
 const fs = require("fs");
 const path = require("path");
 
-function send404(response){
-  response.writeHead(404, {'Content-Type': 'text/plain'});
-  response.write('Error 404: Resource not found.');
-  response.end();
-}
-
 const mimeLookup = {
   '.js': 'application/javascript',
   '.html': 'text/html'
@@ -17,25 +11,28 @@ const server = http.createServer((req, res) => {
   if(req.method == 'GET'){
 
     let fileurl;
+    let filepath;
     if(req.url == '/'){
       fileurl = 'index.html';
-    }else{
-      fileurl = req.url;
+      filepath = path.resolve('./' + fileurl);
     }
-    let filepath = path.resolve('./' + fileurl);
+    else{
+      fileurl = req.url + '.html';
+      filepath = path.resolve('.' + fileurl);
+    } 
+    console.log(fileurl, filepath);
+
 
     let fileExt = path.extname(filepath);
     let mimeType = mimeLookup[fileExt];
 
     if(!mimeType) {
-      send404(res);
-      return;
+      filepath = './404.html'
     }
 
     fs.exists(filepath, (exists) => {
       if(!exists){
-        send404(res);
-        return;
+        filepath = './404.html'
       }
 
       res.writeHead(200, {'Content-Type': mimeType});
@@ -44,5 +41,5 @@ const server = http.createServer((req, res) => {
     });
 
   }
-}).listen(8000);
-console.log("Server running at port 8000");
+}).listen(8080);
+console.log("Server running at port 8080");
